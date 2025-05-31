@@ -1,4 +1,4 @@
-import { getPolicyDetails,getPolicyRiders } from "../utilities/queries.js";
+import { getPolicyDetails,getPolicyRiders,getAddOnsByPolicyAndTier } from "../utilities/queries.js";
 
 const getPEDTier=async(filterScore,age,gender)=>{
     //fetching the policies
@@ -25,4 +25,27 @@ const getPEDTier=async(filterScore,age,gender)=>{
     return policiesWithRiders
 }
 
-export {getPEDTier}
+const addAddOnsToPolicies = async (policiesWithRiders, fitness_score) => {
+    let tier;
+    if (fitness_score <= 33) {
+        tier = 3;
+    } else if (fitness_score < 66) {
+        tier = 2;
+    } else {
+        tier = 1;
+    }
+
+    const policiesWithAddOns = await Promise.all(
+        policiesWithRiders.map(async (policy) => {
+            const addOns = await getAddOnsByPolicyAndTier(policy.id, tier);
+            return {
+                ...policy,
+                add_ons: addOns
+            };
+        })
+    );
+
+    return policiesWithAddOns;
+};
+
+export {getPEDTier,addAddOnsToPolicies}

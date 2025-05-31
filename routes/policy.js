@@ -3,7 +3,7 @@ import express from "express"
 import axios from "axios"
 import {db} from "../config/db.js" 
 import { getPolicyDetails, getUserDiseases,getPolicyRiders } from "../utilities/queries.js";
-import { getPEDTier } from "../utilities/getPEDTier.js";
+import { getPEDTier,addAddOnsToPolicies} from "../utilities/getPEDTier.js";
 
 const clerkAuthMiddleware = clerkMiddleware();
 const router = express.Router()
@@ -51,14 +51,14 @@ router.get("/custom-policies",clerkAuthMiddleware,async(req,res)=>{
     try{
         const {userId}=req.auth()
         const diabetic_score=0.9
-        const hypertension_score=0.7
-        const thyroid_score=0.5
-        const filterScore=boostedScore([diabetic_score*0.8,hypertension_score*0.8,thyroid_score*0.8])
+        const cardiovascular_score=0.7
+        const cancer_score=0.5
+        const filterScore=boostedScore([diabetic_score*0.8,cardiovascular_score*0.8,cancer_score*0.8])
         const fitness_score=67
         const age=40
         const gender="female"
 
-        //yahan user dieases fetch ho rahi hain
+        //yahan user diseases fetch ho rahi hain
         const result = await getUserDiseases(userId)
         if (result.rows.length === 0) {
             return res.status(404).json({ error: "User data not found" });
@@ -74,7 +74,9 @@ router.get("/custom-policies",clerkAuthMiddleware,async(req,res)=>{
             const policies = await getPolicyDetails();
             policiesWithRiders = policies.map(policy => ({ ...policy, riders: [] }));
         }
-        return res.status(200).json({success:true,policiesWithRiders})
+        const policiesWithAddOns = await addAddOnsToPolicies(policiesWithRiders, fitness_score);
+
+        return res.status(200).json({success:true,policiesWithAddOns})
     }
     catch(err){
         console.log("Internal server error",err.message)

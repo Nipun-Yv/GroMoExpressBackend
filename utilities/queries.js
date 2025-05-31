@@ -2,6 +2,27 @@ import express from "express"
 import axios from "axios"
 import {db} from "../config/db.js" 
 
+const getUserFitnessDetails=async(userId)=>{
+  try{
+      const { userId } = req.auth();
+      const result = await db.query(
+            `SELECT 
+                diabetic_score, 
+                cardiovascular_score, 
+                cancer_score, 
+                fitness_score, 
+                age, 
+                gender 
+            FROM fitness_data 
+            WHERE user_id = $1`,
+            [userId]
+        );
+      return result
+  }catch(err){
+      console.log("An error occurred while fetching fitness data to calculate custom policies")
+        throw err
+  }
+}
 const getUserDiseases=async(userId)=>{
     try{
     const result = await db.query(
@@ -58,7 +79,18 @@ const getPolicyRiders = async (policyId, categories) => {
   return result.rows;
 };
 
-export {getUserDiseases,getPolicyDetails,getPolicyRiders}
+const getAddOnsByPolicyAndTier = async (policyId, tier) => {
+    const query = `
+        SELECT a.*
+        FROM add_ons a
+        INNER JOIN policy_add_on pa ON a.id = pa.add_on_id
+        WHERE pa.policy_id = $1 AND a.tier = $2
+    `;
+    const { rows } = await db.query(query, [policyId, tier]);
+    return rows;
+};
+
+export {getUserDiseases,getPolicyDetails,getPolicyRiders,getUserFitnessDetails,getAddOnsByPolicyAndTier}
 // [
 //   {
 //     "id": 1,
