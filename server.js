@@ -2,6 +2,7 @@ import express from "express"
 import fitnessApi from "./routes/google-fit.js"
 import healthApi from "./routes/health.js"
 import policyApi from "./routes/policy.js"
+import couponApi from "./routes/coupon.js"
 import dotenv from "dotenv"
 import cors from "cors"
 import {connectDB,db} from "./config/db.js"
@@ -17,6 +18,7 @@ app.use(express.json())
 app.use("/google-fit",fitnessApi)
 app.use("/health",healthApi)
 app.use("/policy",policyApi)
+app.use("/coupons",couponApi)
 
 app.get("/health",async(req,res)=>{
     const result=await db.query("Select * FROM add_ons")
@@ -25,7 +27,7 @@ app.get("/health",async(req,res)=>{
 })
 connectDB()
 .then(()=>{
-    app.listen(port,()=>{
+    app.listen(port,'0.0.0.0',()=>{
     console.log(`Server running successfully and receiving requests from port ${port}`)
     })
 })

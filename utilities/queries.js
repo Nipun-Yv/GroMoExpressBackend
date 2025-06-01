@@ -26,7 +26,7 @@ const getUserFitnessDetails=async(userId)=>{
 const getUserDiseases=async(userId)=>{
     try{
     const result = await db.query(
-        `SELECT diabetes, hypertension, thyroid, blood_pressure, any_surgery, asthma, other_disease
+        `SELECT diabetes, hypertension,  blood_pressure, other_disease
         FROM fitness_data WHERE user_id = $1`,
       [userId]
         );
